@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Assistente Cucina – Osteria</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #1a1a1a;
+    color: #e8e8e8;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── SETUP SCREEN ── */
+  #setup {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    padding: 2rem;
+    gap: 1.5rem;
+  }
+  #setup h1 { font-size: 1.4rem; text-align: center; }
+  #setup p  { font-size: 0.9rem; color: #aaa; text-align: center; max-width: 340px; }
+  #setup input {
+    width: 100%;
+    max-width: 360px;
+    padding: 0.75rem 1rem;
+    background: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: 8px;
+    color: #e8e8e8;
+    font-size: 0.95rem;
+    letter-spacing: 0.05em;
+  }
+  #setup button {
+    padding: 0.75rem 2rem;
+    background: #c8510a;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    width: 100%;
+    max-width: 360px;
+  }
+  #setup button:hover { background: #e05c0e; }
+  #setup .hint { font-size: 0.78rem; color: #666; }
+
+  /* ── CHAT SCREEN ── */
+  #chat { display: none; flex-direction: column; height: 100dvh; }
+
+  header {
+    padding: 0.75rem 1rem;
+    background: #111;
+    border-bottom: 1px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  header h1 { font-size: 1rem; font-weight: 600; }
+  header span { font-size: 0.75rem; color: #666; }
+  #reset-btn {
+    background: none;
+    border: none;
+    color: #666;
+    font-size: 0.75rem;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+  }
+  #reset-btn:hover { color: #aaa; }
+
+  #messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .msg {
+    max-width: 85%;
+    padding: 0.65rem 0.9rem;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+  }
+  .msg.user {
+    background: #c8510a;
+    color: #fff;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+  }
+  .msg.bot {
+    background: #2a2a2a;
+    color: #e8e8e8;
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+  }
+  .msg.error {
+    background: #3a1a1a;
+    color: #ff6b6b;
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+    font-size: 0.85rem;
+  }
+  .typing {
+    background: #2a2a2a;
+    color: #888;
+    align-self: flex-start;
+    border-radius: 12px;
+    border-bottom-left-radius: 4px;
+    padding: 0.65rem 0.9rem;
+    font-size: 0.85rem;
+    font-style: italic;
+  }
+
+  #input-area {
+    padding: 0.75rem;
+    background: #111;
+    border-top: 1px solid #333;
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-end;
+  }
+  #user-input {
+    flex: 1;
+    background: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 0.65rem 0.9rem;
+    color: #e8e8e8;
+    font-size: 0.95rem;
+    resize: none;
+    min-height: 42px;
+    max-height: 120px;
+    font-family: inherit;
+    line-height: 1.4;
+  }
+  #user-input:focus { outline: none; border-color: #c8510a; }
+  #send-btn {
+    background: #c8510a;
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 1.3rem;
+    cursor: pointer;
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  #send-btn:disabled { background: #444; cursor: not-allowed; }
+  #send-btn:hover:not(:disabled) { background: #e05c0e; }
+
+  .welcome {
+    text-align: center;
+    color: #555;
+    font-size: 0.85rem;
+    margin: auto;
+    padding: 2rem;
+  }
+  .welcome strong { color: #888; display: block; margin-bottom: 0.5rem; font-size: 1rem; }
+  .examples { margin-top: 1rem; display: flex; flex-direction: column; gap: 0.4rem; }
+  .ex-btn {
+    background: #222;
+    border: 1px solid #333;
+    border-radius: 8px;
+    color: #aaa;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-align: left;
+  }
+  .ex-btn:hover { background: #2a2a2a; color: #ddd; }
+</style>
+</head>
+<body>
+
+<!-- SETUP SCREEN -->
+<div id="setup">
+  <h1>🍽️ Assistente Cucina</h1>
+  <p>Inserisci la tua Claude API key per accedere all'assistente.</p>
+  <input type="password" id="api-key-input" placeholder="sk-ant-api03-..." autocomplete="off" />
+  <button onclick="saveKey()">Accedi</button>
+  <p class="hint">La chiave viene salvata nel browser. Non viene mai inviata altrove.</p>
+</div>
+
+<!-- CHAT SCREEN -->
+<div id="chat">
+  <header>
+    <h1>🍽️ Assistente Cucina</h1>
+    <div style="display:flex;align-items:center;gap:0.5rem;">
+      <span id="status-dot" style="width:8px;height:8px;border-radius:50%;background:#4caf50;display:inline-block;"></span>
+      <button id="reset-btn" onclick="resetKey()">Cambia chiave</button>
+    </div>
+  </header>
+  <div id="messages">
+    <div class="welcome">
+      <strong>Ciao! Chiedimi del venduto 👋</strong>
+      Posso rispondere su quantità, medie e trend dei piatti.<br>
+      <div class="examples">
+        <button class="ex-btn" onclick="sendExample(this)">Quante tigelle vendiamo in media?</button>
+        <button class="ex-btn" onclick="sendExample(this)">Qual è il piatto più venduto?</button>
+        <button class="ex-btn" onclick="sendExample(this)">Quanto vendiamo di tiramisù al mese?</button>
+        <button class="ex-btn" onclick="sendExample(this)">Confronta tagliatelle e balanzoni</button>
+      </div>
+    </div>
+  </div>
+  <div id="input-area">
+    <textarea id="user-input" placeholder="Scrivi una domanda..." rows="1"
+      onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+    <button id="send-btn" onclick="sendMessage()">➤</button>
+  </div>
+</div>
+
+<script>
+// ── DATI DEL VENDUTO (solo quantità, senza incassi) ──────────────────────────
+const DATI_VENDUTO = `DATI VENDUTO OSTERIA – Giugno 2025 / Giugno 2026
+(Solo quantità. I dati economici non sono disponibili in questo sistema.)
+
+TAGLIATELLE RAGU: 16694 pz totali (media 2087/mese)
+TAGLIATELLE RAGU': 15775 pz totali (media 2629/mese)
+LASAGNE: 10298 pz totali (media 1287/mese)
+LASAGNA: 8843 pz totali (media 1474/mese)
+TIRAMISU: 8384 pz totali (media 599/mese)
+Tortellini CREMA: 6940 pz totali (media 868/mese)
+TIGELLA: 6715 pz totali (media 517/mese)
+TORTELLINI CREMA: 5998 pz totali (media 1000/mese)
+BALANZONI: 5439 pz totali (media 389/mese)
+TENERINA: 5035 pz totali (media 360/mese)
+BRUSCHETTA POMODORO: 4627 pz totali (media 331/mese)
+PARMIGIANA: 4177 pz totali (media 279/mese)
+Tortellini BRODO: 4021 pz totali (media 503/mese)
+AGG. TIGELLE: 3969 pz totali (media 284/mese)
+COTOLETTA: 3692 pz totali (media 410/mese)
+MASCARPONE: 3138 pz totali (media 224/mese)
+Tortellini TARTUFO: 2883 pz totali (media 360/mese)
+CAPRESE: 2861 pz totali (media 191/mese)
+TORTELLINI BRODO: 2769 pz totali (media 462/mese)
+Primo del Giorno: 2544 pz totali (media 318/mese)
+INSALATONA: 2457 pz totali (media 164/mese)
+Lasagne di Verdure: 2435 pz totali (media 304/mese)
+CLASSICO: 2412 pz totali (media 172/mese)
+LASAGNA VERDURE: 2335 pz totali (media 389/mese)
+COTOLETTA ALLA BOLOGNESE: 2223 pz totali (media 371/mese)
+MORTADELLA: 2070 pz totali (media 188/mese)
+PRIMO DEL GIORNO: 2063 pz totali (media 344/mese)
+TORTA DI RISO: 2023 pz totali (media 145/mese)
+BFEFA: 1940 pz totali (media 647/mese)
+TORTELLONI ROSSI: 1930 pz totali (media 483/mese)
+Tortelloni ROSSI: 1746 pz totali (media 437/mese)
+POLPETTE: 1620 pz totali (media 180/mese)
+TIGELLA FRIGGIONE: 1615 pz totali (media 115/mese)
+Tortelloni ZUCCA: 1497 pz totali (media 299/mese)
+SALAME CIOCCOLATO: 1492 pz totali (media 187/mese)
+MENU BFEFA: 1481 pz totali (media 212/mese)
+CRUDO: 1452 pz totali (media 132/mese)
+TORTELLONI ZUCCA: 1445 pz totali (media 482/mese)
+PATATE AL FORNO: 1437 pz totali (media 96/mese)
+POLPETTE AL SUGO: 1357 pz totali (media 226/mese)
+Tigella PESTO MONTANARO: 1168 pz totali (media 146/mese)
+BRUSCHETTA FRIGGIONE: 1050 pz totali (media 75/mese)
+SALAME CIOCC: 999 pz totali (media 167/mese)
+CLASSICO Pesto Friggione: 932 pz totali (media 117/mese)
+MENU: 921 pz totali (media 132/mese)
+Cotoletta TARTUFO: 880 pz totali (media 98/mese)
+PESTO MONTANARO: 866 pz totali (media 144/mese)
+TIGELLA RAGU: 850 pz totali (media 106/mese)
+LEMON: 845 pz totali (media 60/mese)
+TORTELLINI con Tartufo: 830 pz totali (media 415/mese)
+PASTA SECCA: 828 pz totali (media 104/mese)
+GRANDE: 824 pz totali (media 59/mese)
+PIATTO MORTADELLA: 815 pz totali (media 82/mese)
+DO EAT BETTER: 739 pz totali (media 246/mese)
+GRANDE Pesto Friggione: 731 pz totali (media 91/mese)
+FORMAGGI: 634 pz totali (media 45/mese)
+CLASSICO con Pesto e Friggione: 624 pz totali (media 125/mese)
+PIATTO CRUDO: 619 pz totali (media 62/mese)
+ZUPPA INGLESE: 564 pz totali (media 63/mese)
+TIGELLA MORTADELLA: 549 pz totali (media 137/mese)
+GRANDE con Pesto e Friggione: 536 pz totali (media 89/mese)
+Aggiunta Friggione: 528 pz totali (media 66/mese)
+BRUSCHETTA RAGU: 526 pz totali (media 66/mese)
+GLUTEN FREE RAGU: 521 pz totali (media 87/mese)
+FINOCCHIONA: 482 pz totali (media 44/mese)
+TIGELLA RAGÙ: 450 pz totali (media 75/mese)
+BRUSCHETTA RAGU': 433 pz totali (media 72/mese)
+CLASSICO con Pesto: 408 pz totali (media 29/mese)
+MENU DEB: 406 pz totali (media 58/mese)
+TIGELLA CRUDO: 364 pz totali (media 91/mese)
+Tagliatelle al ragu: 361 pz totali (media 361/mese)
+Aggiunta PESTO: 344 pz totali (media 43/mese)
+Tagliatelle GLUTEN MAIS: 321 pz totali (media 64/mese)
+TORTELLONI BURRO E SALVIA: 304 pz totali (media 51/mese)
+COPPA: 303 pz totali (media 28/mese)
+TORTELLONI BURRO SALVIA: 294 pz totali (media 37/mese)
+CLASSICO Friggione: 259 pz totali (media 32/mese)
+BRESAOLA RUCOLA GRANA: 250 pz totali (media 63/mese)
+AGG FRIGGIONE: 226 pz totali (media 38/mese)
+COTOLETTA con Tartufo: 223 pz totali (media 112/mese)
+AGG PESTO: 218 pz totali (media 36/mese)
+Lasagne: 217 pz totali (media 217/mese)
+PATATE AL FORNO: 1437 pz totali (media 96/mese)
+POLPETTE AL SUGO: 1357 pz totali (media 226/mese)
+PROSCIUTTO E MELONE: 138 pz totali (media 35/mese)
+ANGURIA: 137 pz totali (media 46/mese)
+FINOCCHIONA: 482 pz totali (media 44/mese)
+TIGELLA FINOCCHIONA: 116 pz totali (media 29/mese)
+TIGELLA COPPA: 82 pz totali (media 21/mese)
+TIGELLA PERSONALIZ: 124 pz totali (media 16/mese)
+SALAME CIOCCOLATO: 1492 pz totali (media 187/mese)
+TORTA DI RISO: 2023 pz totali (media 145/mese)
+ZUPPA INGLESE: 564 pz totali (media 63/mese)
+PASTIERA: 50 pz totali (media 50/mese)
+AGNELLO: 52 pz totali (media 52/mese)
+
+NOTE: "TAGLIATELLE RAGU" e "TAGLIATELLE RAGU'" sono lo stesso piatto inserito con nomi diversi nel sistema — somma totale circa 32469 pz (media ~4700/mese).
+Stesso per LASAGNE/LASAGNA (~19141 pz totali), Tortellini CREMA/TORTELLINI CREMA (~12938 pz), Tortelloni ROSSI (~3676 pz), Tortelloni ZUCCA (~2942 pz), Tortellini BRODO (~6790 pz).`;
+
+// ── SYSTEM PROMPT ────────────────────────────────────────────────────────────
+const SYSTEM_PROMPT = `Sei l'assistente della cucina dell'Osteria. Rispondi SOLO a domande sulle quantità di prodotti venduti.
+
+REGOLA ASSOLUTA – NON NEGOZIABILE:
+Non devi MAI fornire informazioni su prezzi, incassi, fatturato, ricavi, importi, food cost o qualsiasi dato economico o finanziario.
+Se ti chiedono di questi argomenti, rispondi esattamente: "Non posso rispondere a domande su incassi o dati economici."
+
+COSA PUOI FARE:
+- Dire quante porzioni di un piatto vengono vendute (totale, media mensile)
+- Confrontare quantità tra piatti
+- Indicare i piatti più o meno venduti
+- Rispondere a domande tipo "quante tigelle in media?", "qual è il dolce più venduto?"
+
+DATI A TUA DISPOSIZIONE:
+${DATI_VENDUTO}
+
+Rispondi sempre in italiano, in modo breve e diretto. Se non hai il dato esatto, di' cosa hai di simile. Usa le somme unificate quando ci sono varianti dello stesso piatto (es. TAGLIATELLE RAGU + TAGLIATELLE RAGU').`;
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+let messages = [];
+let isLoading = false;
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+window.onload = () => {
+  const key = localStorage.getItem('osteria_api_key');
+  if (key) showChat();
+};
+
+function saveKey() {
+  const val = document.getElementById('api-key-input').value.trim();
+  if (!val.startsWith('sk-ant-')) {
+    alert('Chiave non valida. Deve iniziare con sk-ant-');
+    return;
+  }
+  localStorage.setItem('osteria_api_key', val);
+  showChat();
+}
+
+function showChat() {
+  document.getElementById('setup').style.display = 'none';
+  document.getElementById('chat').style.display = 'flex';
+  document.getElementById('user-input').focus();
+}
+
+function resetKey() {
+  if (!confirm('Vuoi cambiare la chiave API?')) return;
+  localStorage.removeItem('osteria_api_key');
+  messages = [];
+  document.getElementById('setup').style.display = 'flex';
+  document.getElementById('chat').style.display = 'none';
+  document.getElementById('api-key-input').value = '';
+}
+
+// ── UI HELPERS ───────────────────────────────────────────────────────────────
+function addMsg(role, text) {
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  div.textContent = text;
+  // Remove welcome message on first real message
+  const welcome = document.querySelector('.welcome');
+  if (welcome) welcome.remove();
+  document.getElementById('messages').appendChild(div);
+  div.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  return div;
+}
+
+function addTyping() {
+  const div = document.createElement('div');
+  div.className = 'typing';
+  div.id = 'typing-indicator';
+  div.textContent = 'sto cercando…';
+  document.getElementById('messages').appendChild(div);
+  div.scrollIntoView({ behavior: 'smooth', block: 'end' });
+}
+
+function removeTyping() {
+  const t = document.getElementById('typing-indicator');
+  if (t) t.remove();
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+function sendExample(btn) {
+  document.getElementById('user-input').value = btn.textContent;
+  sendMessage();
+}
+
+// ── SEND ─────────────────────────────────────────────────────────────────────
+async function sendMessage() {
+  if (isLoading) return;
+  const input = document.getElementById('user-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+  addMsg('user', text);
+  messages.push({ role: 'user', content: text });
+
+  isLoading = true;
+  document.getElementById('send-btn').disabled = true;
+  addTyping();
+
+  try {
+    const key = localStorage.getItem('osteria_api_key');
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 512,
+        system: SYSTEM_PROMPT,
+        messages: messages
+      })
+    });
+
+    removeTyping();
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      if (res.status === 401) {
+        addMsg('error', '❌ Chiave API non valida. Clicca "Cambia chiave" e reinserisci.');
+      } else {
+        addMsg('error', `❌ Errore ${res.status}: ${err.error?.message || 'riprova'}`);
+      }
+      messages.pop();
+    } else {
+      const data = await res.json();
+      const reply = data.content?.[0]?.text || '(risposta vuota)';
+      messages.push({ role: 'assistant', content: reply });
+      addMsg('bot', reply);
+    }
+  } catch (e) {
+    removeTyping();
+    messages.pop();
+    addMsg('error', '❌ Errore di rete. Controlla la connessione e riprova.');
+  }
+
+  isLoading = false;
+  document.getElementById('send-btn').disabled = false;
+  input.focus();
+}
+</script>
+</body>
+</html>
