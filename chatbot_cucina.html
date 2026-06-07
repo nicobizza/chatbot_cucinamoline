@@ -327,8 +327,23 @@ AGNELLO: 52 pz totali (media 52/mese)
 NOTE: "TAGLIATELLE RAGU" e "TAGLIATELLE RAGU'" sono lo stesso piatto inserito con nomi diversi nel sistema — somma totale circa 32469 pz (media ~4700/mese).
 Stesso per LASAGNE/LASAGNA (~19141 pz totali), Tortellini CREMA/TORTELLINI CREMA (~12938 pz), Tortelloni ROSSI (~3676 pz), Tortelloni ZUCCA (~2942 pz), Tortellini BRODO (~6790 pz).`;
 
+// ── DATA CONTESTUALE (data dinamica) ─────────────────────────────────────────
+function getContextoOggi() {
+  const ora = new Date();
+  const giorni = ['domenica','lunedì','martedì','mercoledì','giovedì','venerdì','sabato'];
+  const mesi = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+  const giorno = giorni[ora.getDay()];
+  const data = `${ora.getDate()} ${mesi[ora.getMonth()]} ${ora.getFullYear()}`;
+  const ore = ora.getHours();
+  const servizio = ore < 15 ? 'pranzo' : 'cena';
+  return `OGGI: ${giorno}, ${data} — servizio di ${servizio}`;
+}
+
 // ── SYSTEM PROMPT ────────────────────────────────────────────────────────────
-const SYSTEM_PROMPT = `Sei l'assistente della cucina dell'Osteria. Rispondi SOLO a domande sulle quantità di prodotti venduti.
+function buildSystemPrompt() {
+  return `Sei l'assistente della cucina dell'Osteria. Rispondi SOLO a domande sulle quantità di prodotti venduti.
+
+${getContextoOggi()}
 
 REGOLA ASSOLUTA – NON NEGOZIABILE:
 Non devi MAI fornire informazioni su prezzi, incassi, fatturato, ricavi, importi, food cost o qualsiasi dato economico o finanziario.
@@ -338,12 +353,19 @@ COSA PUOI FARE:
 - Dire quante porzioni di un piatto vengono vendute (totale, media mensile)
 - Confrontare quantità tra piatti
 - Indicare i piatti più o meno venduti
-- Rispondere a domande tipo "quante tigelle in media?", "qual è il dolce più venduto?"
+- Fare STIME per oggi basandoti sui dati storici: ragiona su giorno della settimana (sabato/domenica = weekend più affollato, venerdì sera vivace, lunedì/martedì più tranquilli) e stagione (estate = più secondi e insalate, inverno = più pasta e brodi)
+- Rispondere a domande tipo "quante ne preparo oggi?", "quante tigelle mi aspetto stasera?"
 
 DATI A TUA DISPOSIZIONE:
 ${DATI_VENDUTO}
 
+Quando fai stime per oggi: dividi la media mensile per ~26 giorni lavorativi, poi correggi per il giorno e la stagione:
+- INVERNO/PRIMAVERA/AUTUNNO (settembre–maggio): weekend +30/40%, lunedì-martedì -20%
+- ESTATE (giugno–agosto): weekend = feriale, nessuna correzione per il giorno della settimana
+Esprimi sempre la stima come range (es. "tra 15 e 20 porzioni").
+
 Rispondi sempre in italiano, in modo breve e diretto. Se non hai il dato esatto, di' cosa hai di simile. Usa le somme unificate quando ci sono varianti dello stesso piatto (es. TAGLIATELLE RAGU + TAGLIATELLE RAGU').`;
+}
 
 // ── STATE ────────────────────────────────────────────────────────────────────
 let messages = [];
@@ -453,7 +475,7 @@ async function sendMessage() {
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
         max_tokens: 512,
-        system: SYSTEM_PROMPT,
+        system: buildSystemPrompt(),
         messages: messages
       })
     });
