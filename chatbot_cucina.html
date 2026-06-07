@@ -199,10 +199,7 @@
 <div id="chat">
   <header>
     <h1>🍽️ Assistente Cucina</h1>
-    <div style="display:flex;align-items:center;gap:0.5rem;">
-      <span id="status-dot" style="width:8px;height:8px;border-radius:50%;background:#4caf50;display:inline-block;"></span>
-      <button id="reset-btn" onclick="resetKey()">Cambia chiave</button>
-    </div>
+    <span id="status-dot" style="width:8px;height:8px;border-radius:50%;background:#4caf50;display:inline-block;"></span>
   </header>
   <div id="messages">
     <div class="welcome">
@@ -225,107 +222,60 @@
 
 <script>
 // ── DATI DEL VENDUTO (solo quantità, senza incassi) ──────────────────────────
-const DATI_VENDUTO = `DATI VENDUTO OSTERIA – Giugno 2025 / Giugno 2026
-(Solo quantità. I dati economici non sono disponibili in questo sistema.)
+const DATI_VENDUTO = `DATI VENDUTO OSTERIA - Giugno 2025 / Giugno 2026
+Periodo: 12 mesi. Base: 312 giorni lavorativi, 52 settimane.
 
-TAGLIATELLE RAGU: 16694 pz totali (media 2087/mese)
-TAGLIATELLE RAGU': 15775 pz totali (media 2629/mese)
-LASAGNE: 10298 pz totali (media 1287/mese)
-LASAGNA: 8843 pz totali (media 1474/mese)
-TIRAMISU: 8384 pz totali (media 599/mese)
-Tortellini CREMA: 6940 pz totali (media 868/mese)
-TIGELLA: 6715 pz totali (media 517/mese)
-TORTELLINI CREMA: 5998 pz totali (media 1000/mese)
-BALANZONI: 5439 pz totali (media 389/mese)
-TENERINA: 5035 pz totali (media 360/mese)
-BRUSCHETTA POMODORO: 4627 pz totali (media 331/mese)
-PARMIGIANA: 4177 pz totali (media 279/mese)
-Tortellini BRODO: 4021 pz totali (media 503/mese)
-AGG. TIGELLE: 3969 pz totali (media 284/mese)
-COTOLETTA: 3692 pz totali (media 410/mese)
-MASCARPONE: 3138 pz totali (media 224/mese)
-Tortellini TARTUFO: 2883 pz totali (media 360/mese)
-CAPRESE: 2861 pz totali (media 191/mese)
-TORTELLINI BRODO: 2769 pz totali (media 462/mese)
-Primo del Giorno: 2544 pz totali (media 318/mese)
-INSALATONA: 2457 pz totali (media 164/mese)
-Lasagne di Verdure: 2435 pz totali (media 304/mese)
-CLASSICO: 2412 pz totali (media 172/mese)
-LASAGNA VERDURE: 2335 pz totali (media 389/mese)
-COTOLETTA ALLA BOLOGNESE: 2223 pz totali (media 371/mese)
-MORTADELLA: 2070 pz totali (media 188/mese)
-PRIMO DEL GIORNO: 2063 pz totali (media 344/mese)
-TORTA DI RISO: 2023 pz totali (media 145/mese)
-BFEFA: 1940 pz totali (media 647/mese)
-TORTELLONI ROSSI: 1930 pz totali (media 483/mese)
-Tortelloni ROSSI: 1746 pz totali (media 437/mese)
-POLPETTE: 1620 pz totali (media 180/mese)
-TIGELLA FRIGGIONE: 1615 pz totali (media 115/mese)
-Tortelloni ZUCCA: 1497 pz totali (media 299/mese)
-SALAME CIOCCOLATO: 1492 pz totali (media 187/mese)
-MENU BFEFA: 1481 pz totali (media 212/mese)
-CRUDO: 1452 pz totali (media 132/mese)
-TORTELLONI ZUCCA: 1445 pz totali (media 482/mese)
-PATATE AL FORNO: 1437 pz totali (media 96/mese)
-POLPETTE AL SUGO: 1357 pz totali (media 226/mese)
-Tigella PESTO MONTANARO: 1168 pz totali (media 146/mese)
-BRUSCHETTA FRIGGIONE: 1050 pz totali (media 75/mese)
-SALAME CIOCC: 999 pz totali (media 167/mese)
-CLASSICO Pesto Friggione: 932 pz totali (media 117/mese)
-MENU: 921 pz totali (media 132/mese)
-Cotoletta TARTUFO: 880 pz totali (media 98/mese)
-PESTO MONTANARO: 866 pz totali (media 144/mese)
-TIGELLA RAGU: 850 pz totali (media 106/mese)
-LEMON: 845 pz totali (media 60/mese)
-TORTELLINI con Tartufo: 830 pz totali (media 415/mese)
-PASTA SECCA: 828 pz totali (media 104/mese)
-GRANDE: 824 pz totali (media 59/mese)
-PIATTO MORTADELLA: 815 pz totali (media 82/mese)
-DO EAT BETTER: 739 pz totali (media 246/mese)
-GRANDE Pesto Friggione: 731 pz totali (media 91/mese)
-FORMAGGI: 634 pz totali (media 45/mese)
-CLASSICO con Pesto e Friggione: 624 pz totali (media 125/mese)
-PIATTO CRUDO: 619 pz totali (media 62/mese)
-ZUPPA INGLESE: 564 pz totali (media 63/mese)
-TIGELLA MORTADELLA: 549 pz totali (media 137/mese)
-GRANDE con Pesto e Friggione: 536 pz totali (media 89/mese)
-Aggiunta Friggione: 528 pz totali (media 66/mese)
-BRUSCHETTA RAGU: 526 pz totali (media 66/mese)
-GLUTEN FREE RAGU: 521 pz totali (media 87/mese)
-FINOCCHIONA: 482 pz totali (media 44/mese)
-TIGELLA RAGÙ: 450 pz totali (media 75/mese)
-BRUSCHETTA RAGU': 433 pz totali (media 72/mese)
-CLASSICO con Pesto: 408 pz totali (media 29/mese)
-MENU DEB: 406 pz totali (media 58/mese)
-TIGELLA CRUDO: 364 pz totali (media 91/mese)
-Tagliatelle al ragu: 361 pz totali (media 361/mese)
-Aggiunta PESTO: 344 pz totali (media 43/mese)
-Tagliatelle GLUTEN MAIS: 321 pz totali (media 64/mese)
-TORTELLONI BURRO E SALVIA: 304 pz totali (media 51/mese)
-COPPA: 303 pz totali (media 28/mese)
-TORTELLONI BURRO SALVIA: 294 pz totali (media 37/mese)
-CLASSICO Friggione: 259 pz totali (media 32/mese)
-BRESAOLA RUCOLA GRANA: 250 pz totali (media 63/mese)
-AGG FRIGGIONE: 226 pz totali (media 38/mese)
-COTOLETTA con Tartufo: 223 pz totali (media 112/mese)
-AGG PESTO: 218 pz totali (media 36/mese)
-Lasagne: 217 pz totali (media 217/mese)
-PATATE AL FORNO: 1437 pz totali (media 96/mese)
-POLPETTE AL SUGO: 1357 pz totali (media 226/mese)
-PROSCIUTTO E MELONE: 138 pz totali (media 35/mese)
-ANGURIA: 137 pz totali (media 46/mese)
-FINOCCHIONA: 482 pz totali (media 44/mese)
-TIGELLA FINOCCHIONA: 116 pz totali (media 29/mese)
-TIGELLA COPPA: 82 pz totali (media 21/mese)
-TIGELLA PERSONALIZ: 124 pz totali (media 16/mese)
-SALAME CIOCCOLATO: 1492 pz totali (media 187/mese)
-TORTA DI RISO: 2023 pz totali (media 145/mese)
-ZUPPA INGLESE: 564 pz totali (media 63/mese)
-PASTIERA: 50 pz totali (media 50/mese)
-AGNELLO: 52 pz totali (media 52/mese)
+PATTERN GIORNO SETTIMANA (verificato su dati reali - ATIPICO per Bologna business city):
+  lunedi:    x1.26 - GIORNO PIU ALTO (business lunch)
+  martedi:   x0.89
+  mercoledi: x1.15 - secondo piu alto
+  giovedi:   x0.74
+  venerdi:   x0.73 - GIORNO PIU BASSO (gente lascia Bologna)
+  sabato:    x1.16
+  domenica:  x1.07
+Questo pattern vale tutto l anno. In estate i volumi assoluti calano ma le proporzioni rimangono simili.
 
-NOTE: "TAGLIATELLE RAGU" e "TAGLIATELLE RAGU'" sono lo stesso piatto inserito con nomi diversi nel sistema — somma totale circa 32469 pz (media ~4700/mese).
-Stesso per LASAGNE/LASAGNA (~19141 pz totali), Tortellini CREMA/TORTELLINI CREMA (~12938 pz), Tortelloni ROSSI (~3676 pz), Tortelloni ZUCCA (~2942 pz), Tortellini BRODO (~6790 pz).`;
+MEDIE PER PRODOTTO (annuale | settimanale | giornaliero | per giorno settimana)
+
+TAGLIATELLE RAGU (tutte): 32469 ann | 624/sett | 104/g | lun:131 mar:93 mer:120 gio:77 ven:76 sab:121 dom:112
+LASAGNE/LASAGNA (tutte): 19141 ann | 368/sett | 61/g | lun:77 mar:55 mer:70 gio:45 ven:45 sab:71 dom:66
+Tortellini CREMA (tutte): 12938 ann | 249/sett | 41/g | lun:52 mar:37 mer:47 gio:30 ven:30 sab:48 dom:44
+TIRAMISU: 8384 ann | 161/sett | 27/g | lun:34 mar:24 mer:31 gio:20 ven:20 sab:31 dom:29
+TIGELLA singola: 6715 ann | 129/sett | 22/g | lun:27 mar:19 mer:25 gio:16 ven:16 sab:25 dom:23
+BALANZONI: 5439 ann | 105/sett | 17/g | lun:22 mar:15 mer:20 gio:13 ven:12 sab:20 dom:18
+TENERINA: 5035 ann | 97/sett | 16/g | lun:20 mar:14 mer:18 gio:12 ven:12 sab:19 dom:17
+Tortellini BRODO (tutte): 6790 ann | 131/sett | 22/g | lun:27 mar:19 mer:25 gio:16 ven:16 sab:25 dom:23
+COTOLETTA (tutte): 5915 ann | 114/sett | 19/g | lun:24 mar:17 mer:22 gio:14 ven:14 sab:22 dom:20
+BRUSCHETTA POMODORO: 4627 ann | 89/sett | 15/g | lun:19 mar:13 mer:17 gio:11 ven:11 sab:17 dom:16
+AGG. TIGELLE: 3969 ann | 76/sett | 13/g | lun:16 mar:11 mer:14 gio:10 ven:9 sab:15 dom:14
+PARMIGIANA: 4177 ann | 80/sett | 13/g | lun:17 mar:12 mer:15 gio:10 ven:10 sab:15 dom:14
+MASCARPONE: 3138 ann | 60/sett | 10/g | lun:13 mar:9 mer:11 gio:7 ven:7 sab:12 dom:11
+Tortellini TARTUFO (tutte): 2883 ann | 55/sett | 9/g | lun:11 mar:8 mer:10 gio:7 ven:7 sab:10 dom:10
+Primo del Giorno (tutte): 4607 ann | 89/sett | 15/g | lun:19 mar:13 mer:17 gio:11 ven:11 sab:17 dom:16
+POLPETTE (tutte): 2977 ann | 57/sett | 10/g | lun:12 mar:9 mer:11 gio:7 ven:7 sab:11 dom:10
+Tortelloni ROSSI (tutte): 3676 ann | 71/sett | 12/g | lun:15 mar:11 mer:13 gio:9 ven:9 sab:14 dom:12
+Tortelloni ZUCCA (tutte): 2942 ann | 57/sett | 9/g | lun:12 mar:8 mer:11 gio:7 ven:7 sab:11 dom:10
+SALAME CIOCCOLATO: 1492 ann | 29/sett | 5/g
+PATATE AL FORNO: 1437 ann | 28/sett | 5/g
+POLPETTE AL SUGO: 1357 ann | 26/sett | 4/g
+INSALATONA: 2457 ann | 47/sett | 8/g | lun:10 mar:7 mer:9 gio:6 ven:6 sab:9 dom:8
+CAPRESE: 2861 ann | 55/sett | 9/g | lun:11 mar:8 mer:10 gio:7 ven:7 sab:10 dom:10
+CLASSICO tagliere: 2412 ann | 46/sett | 8/g
+TORTA DI RISO: 2023 ann | 39/sett | 6/g
+TIGELLA FRIGGIONE: 1615 ann | 31/sett | 5/g
+Tigella PESTO MONTANARO: 1168 ann | 22/sett | 4/g
+TIGELLA MORTADELLA: 549 ann | 11/sett | 2/g
+TIGELLA RAGU: 850 ann | 16/sett | 3/g
+TIGELLA CRUDO: 364 ann | 7/sett | 1/g
+BRUSCHETTA RAGU (tutte): 959 ann | 18/sett | 3/g
+BRUSCHETTA FRIGGIONE: 1050 ann | 20/sett | 3/g
+ZUPPA INGLESE: 564 ann | 11/sett | 2/g
+MORTADELLA piatto: 2070 ann | 40/sett | 7/g
+CRUDO piatto: 1452 ann | 28/sett | 5/g
+FORMAGGI tagliere: 634 ann | 12/sett | 2/g
+GRANDE tagliere: 824 ann | 16/sett | 3/g
+GLUTEN FREE RAGU: 521 ann | 10/sett | 2/g`;
+
 
 // ── DATA CONTESTUALE (data dinamica) ─────────────────────────────────────────
 function getContextoOggi() {
@@ -341,66 +291,93 @@ function getContextoOggi() {
 
 // ── SYSTEM PROMPT ────────────────────────────────────────────────────────────
 function buildSystemPrompt() {
-  return `Sei l'assistente della cucina dell'Osteria. Rispondi SOLO a domande sulle quantità di prodotti venduti.
+  const oggiDate = new Date();
+  const giorni = ['domenica','lunedì','martedì','mercoledì','giovedì','venerdì','sabato'];
 
-${getContextoOggi()}
+  // Calcola i prossimi 7 giorni con nome e data
+  const prossimaSett = [];
+  for (let i = 1; i <= 7; i++) {
+    const d = new Date(oggiDate);
+    d.setDate(oggiDate.getDate() + i);
+    const dd = String(d.getDate()).padStart(2,'0');
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    prossimaSett.push(giorni[d.getDay()] + ' ' + dd + '/' + mm);
+  }
 
-REGOLA ASSOLUTA – NON NEGOZIABILE:
-Non devi MAI fornire informazioni su prezzi, incassi, fatturato, ricavi, importi, food cost o qualsiasi dato economico o finanziario.
-Se ti chiedono di questi argomenti, rispondi esattamente: "Non posso rispondere a domande su incassi o dati economici."
+  const reali = DATI_REALI ? '\n\nDATI REALI DAL FOGLIO VENDUTO (aggiornati oggi — usa QUESTI per date specifiche):\n' +
+    'Quando ti chiedono "ieri", "il 5 giugno", "lunedì scorso" ecc., cerca la data nei DATI REALI qui sotto e dai il numero esatto.\n' +
+    'Se la data è presente, usa SEMPRE il numero reale — non le stime storiche.\n' +
+    DATI_REALI : '';
+
+  return \`Sei l'assistente della cucina dell'Osteria Moline. Rispondi SOLO a domande sulle quantità di prodotti venduti.
+
+\${getContextoOggi()}
+Prossimi 7 giorni: \${prossimaSett.join(' | ')}
+
+REGOLA ASSOLUTA:
+Non devi MAI fornire informazioni su prezzi, incassi, fatturato, ricavi, importi, food cost o qualsiasi dato economico.
+Se ti chiedono questi dati rispondi: "Non posso rispondere a domande su incassi o dati economici."
 
 COSA PUOI FARE:
-- Dire quante porzioni di un piatto vengono vendute (totale, media mensile)
+- Dire quante porzioni di un piatto vengono vendute in media (annuale, mensile, settimanale, giornaliero, per giorno della settimana)
 - Confrontare quantità tra piatti
-- Indicare i piatti più o meno venduti
-- Fare STIME per oggi basandoti sui dati storici: ragiona su giorno della settimana (sabato/domenica = weekend più affollato, venerdì sera vivace, lunedì/martedì più tranquilli) e stagione (estate = più secondi e insalate, inverno = più pasta e brodi)
+- Fare STIME per oggi, domani, questa settimana, la prossima settimana
 - Rispondere a domande tipo "quante ne preparo oggi?", "quante tigelle mi aspetto stasera?"
 
-DATI A TUA DISPOSIZIONE:
-${DATI_VENDUTO}
+COME FARE LE STIME — REGOLA ASSOLUTA:
+In DATI_VENDUTO ogni prodotto ha già i valori reali per ogni giorno della settimana:
+  es. TAGLIATELLE RAGU: lun:131 mar:93 mer:120 gio:77 ven:76 sab:121 dom:112
 
-Quando fai stime per oggi: dividi la media mensile per ~26 giorni lavorativi, poi correggi per il giorno e la stagione:
-- INVERNO/PRIMAVERA/AUTUNNO (settembre–maggio): weekend +30/40%, lunedì-martedì -20%
-- ESTATE (giugno–agosto): weekend = feriale, nessuna correzione per il giorno della settimana
-Esprimi sempre la stima come range (es. "tra 15 e 20 porzioni").
+REGOLA: quando stimi "oggi" o un giorno specifico, USA SEMPRE e SOLO il valore DOW (lun/mar/mer/gio/ven/sab/dom).
+MAI fare calcoli partendo da medie mensili o annuali — quei numeri non interessano al cuoco.
+NON menzionare mai medie mensili o annuali nelle risposte sulle stime giornaliere.
 
-Rispondi sempre in italiano, in modo breve e diretto. Se non hai il dato esatto, di' cosa hai di simile. Usa le somme unificate quando ci sono varianti dello stesso piatto (es. TAGLIATELLE RAGU + TAGLIATELLE RAGU').`;
+Esempio CORRETTO per domenica: "Tagliatelle: circa 112 porzioni (±15%, tra 95 e 130)"
+Esempio SBAGLIATO: "Tagliatelle: tra 160-190 (media ~4700/mese)" — NON fare così
+
+Per la prossima settimana: elenca ogni giorno con il valore DOW corrispondente di ogni piatto.
+In estate (giugno–agosto) applica -10% sui valori DOW.
+Dai sempre numeri concreti, mai "non so" o "dipende dalle prenotazioni".
+
+DATI STORICI (12 mesi giugno 2025 - giugno 2026):
+\${DATI_VENDUTO}\${reali}
+
+Rispondi in italiano, breve e diretto. Somma le varianti dello stesso piatto (es. TAGLIATELLE RAGU = tutte le varianti).\`;
 }
 
 // ── STATE ────────────────────────────────────────────────────────────────────
+const API_KEY = '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';
 let messages = [];
 let isLoading = false;
+let DATI_REALI = '';
+// Dopo aver deployato il Google Apps Script, incolla qui l'URL:
+let APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwrjOIfIj6G83kZWuxriVsHXRpQF1nTLlOAZhNFQ273IRQR0SkP_l-4Tw6WcGq5u6kI/exec';
+
+// ── CARICA DATI REALI DAL GOOGLE SHEET ───────────────────────────────────────
+function loadDatiReali() {
+  if (!APPS_SCRIPT_URL) return;
+  const cbName = '_vcb' + Date.now();
+  window[cbName] = function(data) {
+    if (data && data.dati) {
+      DATI_REALI = data.dati;
+      const b = document.getElementById('dati-banner');
+      if (b) { b.textContent = '✓ Dati aggiornati al ' + (data.aggiornato || ''); b.style.display = 'block'; }
+    }
+    delete window[cbName];
+  };
+  const s = document.createElement('script');
+  s.src = APPS_SCRIPT_URL + '?callback=' + cbName;
+  s.onerror = () => delete window[cbName];
+  document.body.appendChild(s);
+}
 
 // ── INIT ─────────────────────────────────────────────────────────────────────
 window.onload = () => {
-  const key = localStorage.getItem('osteria_api_key');
-  if (key) showChat();
-};
-
-function saveKey() {
-  const val = document.getElementById('api-key-input').value.trim();
-  if (!val.startsWith('sk-ant-')) {
-    alert('Chiave non valida. Deve iniziare con sk-ant-');
-    return;
-  }
-  localStorage.setItem('osteria_api_key', val);
-  showChat();
-}
-
-function showChat() {
   document.getElementById('setup').style.display = 'none';
   document.getElementById('chat').style.display = 'flex';
   document.getElementById('user-input').focus();
-}
-
-function resetKey() {
-  if (!confirm('Vuoi cambiare la chiave API?')) return;
-  localStorage.removeItem('osteria_api_key');
-  messages = [];
-  document.getElementById('setup').style.display = 'flex';
-  document.getElementById('chat').style.display = 'none';
-  document.getElementById('api-key-input').value = '';
-}
+  loadDatiReali();
+};
 
 // ── UI HELPERS ───────────────────────────────────────────────────────────────
 function addMsg(role, text) {
@@ -463,7 +440,7 @@ async function sendMessage() {
   addTyping();
 
   try {
-    const key = localStorage.getItem('osteria_api_key');
+    const key = API_KEY;
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
